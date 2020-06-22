@@ -1,0 +1,38 @@
+{
+  "name": "yifysub",
+  "version": "0.1.0",
+  "description": "download subtitles from yifysubtitles",
+  "author": "wuuzw",
+  "main": "src/index.js",
+  "bin": {
+    "yifysub": "src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "enquirer": "^2.3.5",
+    "extract-zip": "^2.0.1",
+    "kleur": "^4.0.1",
+    "parse-torrent-title": "^1.3.0",
+    "prompts": "^2.3.2",
+    "superagent": "^5.2.2"
+  },
+  "bugs": {
+    "url": "https://github.com/wuuzw/yifysub/issues"
+  },
+  "homepage": "https://github.com/wuuzw/yifysub",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wuuzw/yifysub.git"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "yify",
+    "subtitle",
+    "yifysubtitles"
+  ]
+}
