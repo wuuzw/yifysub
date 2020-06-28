@@ -47,7 +47,7 @@ async function selectSubtitles(subtitles) {
 
 async function selectImdbId(results) {
   if (results.length === 1) {
-    return results[0]['imdb_code'];
+    return results[0]['imdbId'];
   }
 
   let {imdbId} = await prompt({
@@ -56,8 +56,8 @@ async function selectImdbId(results) {
     message: 'Too many search results. Pick a movie',
     choices: results.map(result => {
       return {
-        title: `${ result['year'] } - ${ result['title'] }`,
-        value: result['imdb_code'],
+        title: `${ result['year'] } - ${ result['title'] } - ${ result['imdbId'] }`,
+        value: result['imdbId'],
       };
     }),
     result(value) {
@@ -101,13 +101,19 @@ async function setup() {
         return this.state.answers.moviePath;
       },
     },
+    {
+      type: 'input',
+      name: 'omdbKey',
+      message: 'Enter OMDB API key to use OMDB for obtaining movie info (Leave blank to use YTS API)',
+      initial: '',
+    },
   ]);
 
   return response;
 }
 
 async function start() {
-  let {moviePath, language, downloadPath} = await setup();
+  let {moviePath, language, downloadPath, omdbKey} = await setup();
   let movies = parseFiles(moviePath);
 
   if (movies.length === 0) {
@@ -118,7 +124,7 @@ async function start() {
     console.log(`Downloading... [${ i + 1 }/${ movies.length }]`);
     console.log(`${ green('year' in movies[i] ? movies[i].year : 'Unknown') } - ${ movies[i].title }`);
 
-    let results = await search(movies[i]);
+    let results = await search(movies[i], omdbKey);
 
     if (results.length >= 1) {
       let imdbId = await selectImdbId(results);

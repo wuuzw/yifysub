@@ -7,8 +7,17 @@ const extract = require('extract-zip');
 
 const YIYFSUBTITLES_URL = 'https://yifysubtitles.com';
 const YTS_URL = 'https://yts.mx/api/v2';
+const OMDB_URL = 'https://www.omdbapi.com';
 
-async function search(movie) {
+async function search(movie, omdbKey = '') {
+  if (omdbKey === '') {
+    return await searchYTS(movie);
+  } else {
+    return await searchOmdb(movie, omdbKey);
+  }
+}
+
+async function searchYTS(movie) {
   let response = await superagent.get(`${ YTS_URL }/list_movies.json`).query({query_term: movie.title});
   let results = [];
 
@@ -22,7 +31,40 @@ async function search(movie) {
     results = results.filter(item => item['year'] === movie.year);
   }
 
-  return results;
+  return results.map(item => {
+    return {
+      imdbId: item['imdb_code'],
+      title: item['title'],
+      year: item['year'],
+    };
+  });
+}
+
+async function searchOmdb(movie, omdbKey) {
+  try {
+    let results = [];
+    let response = await superagent.get(OMDB_URL).
+        query({apikey: omdbKey, s: movie.title, type: 'movie', y: movie.year === undefined ? '' : movie.year});
+    if (response.body['Response'] === 'False') {
+      return results;
+    }
+
+    results = response.body['Search'].filter(item => item['Title'].toLowerCase() === movie.title.toLowerCase());
+
+    if (movie.year !== undefined) {
+      results = results.filter(item => item['Year'] === movie.year.toString());
+    }
+
+    return results.map(item => {
+      return {
+        imdbId: item['imdbID'],
+        title: item['Title'],
+        year: item['Year'],
+      };
+    });
+  } catch (e) {
+    throw new Error(e.response.body['Error']);
+  }
 }
 
 async function getSubtitles(imdbId) {
@@ -63,5 +105,7 @@ function downloadSubtitle(url, outputDir) {
       },
   );
 }
+
+// search({ title: 'youth' }, '46e1a00').then(r => console.log('done'))
 
 module.exports = {search, getSubtitles, downloadSubtitle};
